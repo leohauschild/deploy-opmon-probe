@@ -1,0 +1,64 @@
+---
+# tasks file for install-opmon
+
+- name: Baixa e instala o opmon
+  shell: curl http://repo.opservices.com/rpms/latest/opmon-install | bash
+  register: install_opmon
+- debug:
+    msg: install_opmon.stderr
+
+- name: Configure merlin file 
+  blockinfile: 
+    path: /etc/merlin/merlin.conf
+    insertafter: EOF
+    block: |
+        master {{ PROBE_MASTER }} {
+        address = {{ PROBE_MASTER }}
+        port = 15551
+        connect = no
+        notifies = yes
+        }   
+  register: config_merlin_probe
+
+- name: configura a probe
+  shell: y | /usr/local/opmon/utils/merlin/merlin-probe-setup.sh 
+  register: config_probe
+
+- name: Change permissions /var/cache/merlin/
+  file: 
+    path: /var/cache/merlin/
+    recurse: yes
+    owner: opuser
+    group: opuser
+  register: dir_merlin_cache
+
+- name: Cria diretorio .ssh 
+  file:
+    path: /home/opuser/.ssh
+    state: directory
+    mode: '0700'
+    owner: opuser
+    group: opuser
+  register: crate_dir_ssh
+
+- name: Cria arquivo authorize_keys
+  file:
+    path: /home/opuser/.ssh/authorized_keys
+    state: touch
+    mode: '0400'
+    owner: opuser
+    group: opuser
+  register: create_file_keys
+
+- name: copia ssh key para dentro do authorized_keys
+  shell: echo {{ SSH_KEY }} >> /home/opuser/.ssh/authorized_keys
+
+- name: restart opmon
+  shell: /etc/init.d/opmon restart
+  register: restart_opmon
+
+- name: restart merlin
+  shell: service merlind restart
+  ignore_errors: yes
+  register: restart_merlin
+

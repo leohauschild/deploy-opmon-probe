@@ -1,0 +1,37 @@
+---
+# tasks file for prepare-probe
+
+- name: Test internet connection
+  shell: ping -c 5 registro.br
+  register: test_connection
+- debug:
+    msg: test_connection.stderr    
+
+- name: Update all installed packages using YUM module
+  yum:
+    name: '*'
+    state: latest
+    update_cache: yes
+    update_only: yes
+  ignore_errors: yes
+  register: yum_update_status
+
+
+- name: Change Probe's name
+  shell: hostname {{ NAME_PROBE }}
+  register: change_name_probe
+
+- name: Disable firewall
+  shell: systemctl disable firewalld
+  register: disable_fw
+
+- name: Add master on hosts file 
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ FILE_HOSTS_PROBE }}"
+    create: yes
+  register: config_hosts_probe
+
+
+
+  

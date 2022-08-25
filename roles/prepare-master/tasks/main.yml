@@ -1,0 +1,34 @@
+---
+# tasks file for prepare-master
+
+- name: Add probe on hosts file 
+  lineinfile:
+    path: /etc/hosts
+    insertafter: EOF
+    line: "{{ IP_PROBE }}    {{ NAME_PROBE_2 }} {{ NAME_PROBE }}"
+    create: yes
+  register: config_hosts_master
+
+- name: Configure merlin.conf on master
+  blockinfile: 
+    path: /etc/merlin/merlin.conf
+    insertafter: EOF
+    block: |
+        poller {{ NAME_PROBE }} {
+        address = {{ NAME_PROBE }};
+        port = 15551;
+        connect = yes;
+        takeover = no;
+        hostgroup = {{ HOSTGROUP }};
+        notifies = no
+        }
+  register: config_merlin_master
+
+- name: restart merlin
+  shell: service merlind restart
+  ignore_errors: yes
+  register: restart_merlin
+
+- name: restart opmon
+  shell: /etc/init.d/opmon restart
+  register: restart_opmon

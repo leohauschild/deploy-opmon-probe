@@ -1,0 +1,23 @@
+---
+# tasks file for ssh-connection
+
+- name: test ssh connection master -> probe
+  shell: runuser -l opuser -c 'ssh -o StrictHostKeyChecking=no '{{ NAME_PROBE }}' -o 'BatchMode=yes' -o 'ConnectionAttempts=1' true'
+  register: ssh_connection_test 
+- debug:
+    msg: ssh_connection_test.stderr
+
+- name: run merlin_sync.conf.sh
+  shell: runuser -l opuser -c '/usr/local/opmon/bin/merlin_sync.conf.sh {{ NAME_PROBE }}'
+  register: sync_conf_status
+- debug:
+    msg: sync_conf_status.stderr
+
+- name: restart opmon
+  shell: /etc/init.d/opmon restart
+  register: restart_opmon
+
+- name: restart merlin
+  shell: service merlind restart
+  ignore_errors: yes
+  register: restart_merlin
