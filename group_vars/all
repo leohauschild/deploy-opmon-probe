@@ -1,0 +1,16 @@
+---
+
+## Vars VM Probe
+IP_PROBE: xxx.xxx.xxx.xxx
+NAME_PROBE: "name probe"
+NAME_PROBE_2: "name probe 2"
+FILE_HOSTS_PROBE: "IP master   name master"
+SSH_KEY: "SSH-KEY MASTER"
+
+## Vars Server Master
+IP_MASTER: xxx.xxx.xxx.xxx
+PROBE_MASTER: "name probe master"
+HOSTGROUP: "host group"
+
+
+

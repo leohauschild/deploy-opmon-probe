@@ -1,0 +1,25 @@
+- hosts: probe
+  user: root
+  become: yes
+  roles:
+  - { role: prepare-probe, tags: ["prepare-probe-role"] }
+
+- hosts: probe
+  user: root
+  become: yes
+  roles:
+  - { role: install-opmon, tags: ["install-opmon-role"] }
+
+- hosts: master
+  user: root
+  become: yes
+  roles:
+  - { role: prepare-master, tags: ["prepare-master-role"] }
+
+- hosts: master
+  user: root
+  become: yes
+  roles:
+  - { role: ssh-connection, tags: ["ssh-connection-role"] }
+
+
